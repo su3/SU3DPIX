@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "SUPCalculator.h"
 
 @import CoreMotion;
 
@@ -17,6 +18,8 @@
 @property (nonatomic, assign) NSInteger currentIndex;
 @property (nonatomic, assign) NSInteger toIndex;
 
+@property (nonatomic, strong) CMMotionManager *motionManager;
+@property (nonatomic, assign) double startDegree;
 @end
 
 @implementation ViewController
@@ -27,7 +30,7 @@
     [super viewDidLoad];
     [self initData];
     [self.view addSubview:self.showView];
-    
+    [self startMotionDetect];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -39,6 +42,7 @@
 
 - (void)handleGesture:(UIGestureRecognizer *)sender{
     if (sender.state == UIGestureRecognizerStateBegan) {
+        [self.motionManager stopDeviceMotionUpdates];
         _startLocation = [sender locationInView:self.view];
         _toIndex = _currentIndex;
         
@@ -64,7 +68,57 @@
     }
     else if(sender.state == UIGestureRecognizerStateEnded){
         _currentIndex = _toIndex;
+        [self startMotionDetect];
     }
+}
+
+#pragma mark - Motion
+
+- (void)startMotionDetect{
+    
+    __weak typeof(self) weakSelf = self;
+    _toIndex = 0;
+    _startDegree = 0.;
+    NSInteger startIndex = _currentIndex;
+    if (self.motionManager.deviceMotionAvailable) {
+        [_motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion * _Nullable motion, NSError * _Nullable error) {
+            [weakSelf processMotion:motion fromIndex:startIndex];
+        }];
+        
+    }
+}
+
+- (void)processMotion:(CMDeviceMotion *)motion fromIndex:(NSInteger)startIndex{
+    NSInteger listCount = _imageNameList.count;
+    double roll = [SUPCalculator degrees:motion.attitude.roll];
+    
+    if (_startDegree == 0.) {
+        _startDegree = [SUPCalculator degrees:motion.attitude.roll];
+        NSLog(@"start: %f", _startDegree);
+    }
+    double diff =  roll - _startDegree;
+    double diffChange = diff / 60;
+    
+    NSInteger diffIndex = listCount * diffChange;
+    _toIndex = startIndex - diffIndex;
+    _toIndex = _toIndex > 0 ? MIN(_toIndex, listCount - 1) : 0;
+    
+    [self goToIndex:_toIndex];
+}
+
+- (void)goToIndex:(NSInteger)toIndex{
+    NSInteger listCount = _imageNameList.count;
+    
+    if (_currentIndex > _toIndex) {
+        _currentIndex--;
+    }else if (_currentIndex < _toIndex){
+        _currentIndex++;
+    }
+    _currentIndex = _currentIndex > 0 ? MIN(_currentIndex, listCount - 1) : 0;
+    
+    NSString *imageName = _imageNameList[_currentIndex];
+    [self.showView setImage:[UIImage imageNamed:imageName]];
+    [self.showView setNeedsDisplay];
 }
 
 #pragma mark - Data
@@ -100,4 +154,11 @@
     return _showView;
 }
 
+- (CMMotionManager *)motionManager{
+    if (!_motionManager) {
+        _motionManager = [[CMMotionManager alloc] init];
+        _motionManager.deviceMotionUpdateInterval = 0.01;
+    }
+    return _motionManager;
+}
 @end

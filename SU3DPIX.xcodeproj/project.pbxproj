@@ -13,6 +13,7 @@
 		94B09DB01DAF1453000A5033 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 94B09DAE1DAF1453000A5033 /* Main.storyboard */; };
 		94B09DB21DAF1453000A5033 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94B09DB11DAF1453000A5033 /* Assets.xcassets */; };
 		94B09DB51DAF1453000A5033 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 94B09DB31DAF1453000A5033 /* LaunchScreen.storyboard */; };
+		94B975361DB05DF800515E5B /* SUPCalculator.m in Sources */ = {isa = PBXBuildFile; fileRef = 94B975351DB05DF800515E5B /* SUPCalculator.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,8 @@
 		94B09DB11DAF1453000A5033 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		94B09DB41DAF1453000A5033 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		94B09DB61DAF1453000A5033 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		94B975341DB05DF800515E5B /* SUPCalculator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUPCalculator.h; sourceTree = "<group>"; };
+		94B975351DB05DF800515E5B /* SUPCalculator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUPCalculator.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,10 +61,9 @@
 		94B09DA41DAF1453000A5033 /* SU3DPIX */ = {
 			isa = PBXGroup;
 			children = (
-				94B09DA81DAF1453000A5033 /* AppDelegate.h */,
-				94B09DA91DAF1453000A5033 /* AppDelegate.m */,
-				94B09DAB1DAF1453000A5033 /* ViewController.h */,
-				94B09DAC1DAF1453000A5033 /* ViewController.m */,
+				94B975331DB05CFD00515E5B /* app delegate */,
+				94B975321DB05CD400515E5B /* module */,
+				94B975311DB05CBB00515E5B /* Helper */,
 				94B09DAE1DAF1453000A5033 /* Main.storyboard */,
 				94B09DB11DAF1453000A5033 /* Assets.xcassets */,
 				94B09DB31DAF1453000A5033 /* LaunchScreen.storyboard */,
@@ -77,6 +79,33 @@
 				94B09DA61DAF1453000A5033 /* main.m */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		94B975311DB05CBB00515E5B /* Helper */ = {
+			isa = PBXGroup;
+			children = (
+				94B975341DB05DF800515E5B /* SUPCalculator.h */,
+				94B975351DB05DF800515E5B /* SUPCalculator.m */,
+			);
+			name = Helper;
+			sourceTree = "<group>";
+		};
+		94B975321DB05CD400515E5B /* module */ = {
+			isa = PBXGroup;
+			children = (
+				94B09DAB1DAF1453000A5033 /* ViewController.h */,
+				94B09DAC1DAF1453000A5033 /* ViewController.m */,
+			);
+			name = module;
+			sourceTree = "<group>";
+		};
+		94B975331DB05CFD00515E5B /* app delegate */ = {
+			isa = PBXGroup;
+			children = (
+				94B09DA81DAF1453000A5033 /* AppDelegate.h */,
+				94B09DA91DAF1453000A5033 /* AppDelegate.m */,
+			);
+			name = "app delegate";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -151,6 +180,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94B975361DB05DF800515E5B /* SUPCalculator.m in Sources */,
 				94B09DAD1DAF1453000A5033 /* ViewController.m in Sources */,
 				94B09DAA1DAF1453000A5033 /* AppDelegate.m in Sources */,
 				94B09DA71DAF1453000A5033 /* main.m in Sources */,
@@ -312,6 +342,7 @@
 				94B09DBB1DAF1453000A5033 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
