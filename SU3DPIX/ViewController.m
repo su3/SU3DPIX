@@ -9,27 +9,33 @@
 #import "ViewController.h"
 #import "SUPCalculator.h"
 
+
+static NSString *kIndexValueChangedKey = @"indexValueChanged";
+
 @import CoreMotion;
 
 @interface ViewController ()
 @property (nonatomic, strong) UIImageView *showView;
 @property (nonatomic, strong)  NSMutableArray *imageNameList;
 @property (nonatomic, assign) CGPoint startLocation;
-@property (nonatomic, assign) NSInteger currentIndex;
+@property (nonatomic, assign) NSUInteger currentIndex;
 @property (nonatomic, assign) NSInteger toIndex;
-
+@property (nonatomic, assign) NSUInteger indexValueChanged;
 @property (nonatomic, strong) CMMotionManager *motionManager;
 @property (nonatomic, assign) double startDegree;
 @end
 
-@implementation ViewController
+@implementation ViewController{
+    NSUInteger myValue;
+}
 
 #pragma mark - Life Circle
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self initData];
     [self.view addSubview:self.showView];
+    
+    [self getReady];
     [self startMotionDetect];
 }
 
@@ -38,14 +44,28 @@
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark - kvo
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
+    if ([keyPath isEqualToString:kIndexValueChangedKey]) {
+        id oldValue =  [change objectForKey:NSKeyValueChangeOldKey];
+        id newValue = [change objectForKey:NSKeyValueChangeNewKey];
+        if ([oldValue integerValue] != [newValue integerValue]) {
+            NSString *imageName = _imageNameList[[newValue integerValue]];
+            [self.showView setImage:[UIImage imageNamed:imageName]];
+            [self.showView setNeedsDisplay];
+        }
+    }
+}
+
 #pragma mark - Gestures
 
 - (void)handleGesture:(UIGestureRecognizer *)sender{
+
     if (sender.state == UIGestureRecognizerStateBegan) {
         [self.motionManager stopDeviceMotionUpdates];
         _startLocation = [sender locationInView:self.view];
         _toIndex = _currentIndex;
-        
     }
     else if (sender.state == UIGestureRecognizerStateChanged) {
         static CGFloat kRotationMultiplier = 0.5f;
@@ -62,9 +82,7 @@
         CGFloat indexChanged = indexPer - (panChange * kRotationMultiplier);
         _toIndex =  listCount * indexChanged;
         _toIndex = _toIndex > 0 ? MIN(_toIndex, listCount - 1) : 0;
-        NSString *imageName = _imageNameList[_toIndex];
-        [self.showView setImage:[UIImage imageNamed:imageName]];
-        [self.showView setNeedsDisplay];
+        [self setValue:@(_toIndex) forKey:kIndexValueChangedKey];
     }
     else if(sender.state == UIGestureRecognizerStateEnded){
         _currentIndex = _toIndex;
@@ -77,7 +95,7 @@
 - (void)startMotionDetect{
     
     __weak typeof(self) weakSelf = self;
-    _toIndex = 0;
+//    _toIndex = 0;
     _startDegree = 0.;
     NSInteger startIndex = _currentIndex;
     if (self.motionManager.deviceMotionAvailable) {
@@ -94,7 +112,6 @@
     
     if (_startDegree == 0.) {
         _startDegree = [SUPCalculator degrees:motion.attitude.roll];
-        NSLog(@"start: %f", _startDegree);
     }
     double diff =  roll - _startDegree;
     double diffChange = diff / 60;
@@ -109,24 +126,23 @@
 - (void)goToIndex:(NSInteger)toIndex{
     NSInteger listCount = _imageNameList.count;
     
-    if (_currentIndex > _toIndex) {
+    if (_currentIndex > toIndex) {
         _currentIndex--;
-    }else if (_currentIndex < _toIndex){
+    }else if (_currentIndex < toIndex){
         _currentIndex++;
     }
+
     _currentIndex = _currentIndex > 0 ? MIN(_currentIndex, listCount - 1) : 0;
-    
-    NSString *imageName = _imageNameList[_currentIndex];
-    [self.showView setImage:[UIImage imageNamed:imageName]];
-    [self.showView setNeedsDisplay];
+    [self setValue:@(_currentIndex) forKey:kIndexValueChangedKey];
 }
 
 #pragma mark - Data
 
-- (void)initData{
+- (void)getReady{
+     [self addObserver:self forKeyPath:kIndexValueChangedKey options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
+    
     _currentIndex = self.imageNameList.count * 0.5;
-    NSString *imageName = _imageNameList[_currentIndex];
-    [self.showView setImage:[UIImage imageNamed:imageName]];
+    [self setValue:@(_currentIndex) forKey:kIndexValueChangedKey];
     
     UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleGesture:)];
     [self.view addGestureRecognizer:pan];
