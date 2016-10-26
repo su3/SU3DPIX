@@ -41,9 +41,11 @@ static NSString *kIndexValueChangedKey = @"indexValueChanged";
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
+- (void)dealloc{
+    [self removeObserver:self forKeyPath:kIndexValueChangedKey];
+}
 #pragma mark - kvo
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
@@ -95,7 +97,6 @@ static NSString *kIndexValueChangedKey = @"indexValueChanged";
 - (void)startMotionDetect{
     
     __weak typeof(self) weakSelf = self;
-//    _toIndex = 0;
     _startDegree = 0.;
     NSInteger startIndex = _currentIndex;
     if (self.motionManager.deviceMotionAvailable) {
@@ -114,24 +115,18 @@ static NSString *kIndexValueChangedKey = @"indexValueChanged";
         _startDegree = [SUPCalculator degrees:motion.attitude.roll];
     }
     double diff =  roll - _startDegree;
-    double diffChange = diff / 60;
+    double diffChange = diff / 50;
     
     NSInteger diffIndex = listCount * diffChange;
     _toIndex = startIndex - diffIndex;
     _toIndex = _toIndex > 0 ? MIN(_toIndex, listCount - 1) : 0;
     
-    [self goToIndex:_toIndex];
-}
-
-- (void)goToIndex:(NSInteger)toIndex{
-    NSInteger listCount = _imageNameList.count;
-    
-    if (_currentIndex > toIndex) {
+    if (_currentIndex > _toIndex) {
         _currentIndex--;
-    }else if (_currentIndex < toIndex){
+    }else if (_currentIndex < _toIndex){
         _currentIndex++;
     }
-
+    
     _currentIndex = _currentIndex > 0 ? MIN(_currentIndex, listCount - 1) : 0;
     [self setValue:@(_currentIndex) forKey:kIndexValueChangedKey];
 }
