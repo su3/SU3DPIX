@@ -5,4 +5,6 @@ Imitate [Fyuse](https://itunes.apple.com/us/app/fyuse/id862863329?mt=8) 3D visua
 Pictures from [https://fyu.se/v/aaf3uun795](https://fyu.se/v/aaf3uun795)
 
 ##Preview
-![loading](http://7vzort.com1.z0.glb.clouddn.com/3dpix.gif)
+![3dpix](http://7vzort.com1.z0.glb.clouddn.com/3dpix.gif)
+
+[GIF](http://7vzort.com1.z0.glb.clouddn.com/3dpix.gif)
