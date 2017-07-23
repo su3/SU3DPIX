@@ -109,13 +109,15 @@ static NSString *kIndexValueChangedKey = @"indexValueChanged";
 
 - (void)processMotion:(CMDeviceMotion *)motion fromIndex:(NSInteger)startIndex{
     NSInteger listCount = _imageNameList.count;
-    double roll = [SUPCalculator degrees:motion.attitude.roll];
-    
+
+    double temp = motion.attitude.roll + motion.attitude.yaw + motion.attitude.pitch;
+    double roll = [SUPCalculator degrees:temp];
+
     if (_startDegree == 0.) {
-        _startDegree = [SUPCalculator degrees:motion.attitude.roll];
+        _startDegree = [SUPCalculator degrees:temp];
     }
     double diff =  roll - _startDegree;
-    double diffChange = diff / 50;
+    double diffChange = diff / 70;
     
     NSInteger diffIndex = listCount * diffChange;
     _toIndex = startIndex - diffIndex;
