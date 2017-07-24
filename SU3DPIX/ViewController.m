@@ -46,6 +46,16 @@ static NSString *kIndexValueChangedKey = @"indexValueChanged";
 - (void)dealloc{
     [self removeObserver:self forKeyPath:kIndexValueChangedKey];
 }
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedNotification:) name:@"APP_ACTIVE_NOTIFICATION" object:nil];
+}
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [[NSNotificationCenter defaultCenter] removeObserver:@"APP_ACTIVE_NOTIFICATION"];
+}
 #pragma mark - kvo
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
@@ -110,7 +120,7 @@ static NSString *kIndexValueChangedKey = @"indexValueChanged";
 - (void)processMotion:(CMDeviceMotion *)motion fromIndex:(NSInteger)startIndex{
     NSInteger listCount = _imageNameList.count;
 
-    double temp = motion.attitude.roll + motion.attitude.yaw + motion.attitude.pitch;
+    double temp = motion.attitude.roll + motion.attitude.pitch - motion.attitude.yaw;
     double roll = [SUPCalculator degrees:temp];
 
     if (_startDegree == 0.) {
@@ -137,6 +147,12 @@ static NSString *kIndexValueChangedKey = @"indexValueChanged";
 - (void)updateCurrentIndexWithListCount:(NSInteger)listCount{
     _currentIndex = _currentIndex > 0 ? MIN(_currentIndex, listCount - 1) : 0;
     [self setValue:@(_currentIndex) forKey:kIndexValueChangedKey];
+}
+
+- (void)receivedNotification:(NSNotification *)notification{
+    if ([notification.name isEqualToString:@"APP_ACTIVE_NOTIFICATION"]) {
+        //TODO
+    }
 }
 
 #pragma mark - Data
