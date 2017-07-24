@@ -123,12 +123,18 @@ static NSString *kIndexValueChangedKey = @"indexValueChanged";
     _toIndex = startIndex - diffIndex;
     _toIndex = _toIndex > 0 ? MIN(_toIndex, listCount - 1) : 0;
     
-    if (_currentIndex > _toIndex) {
+    while (_currentIndex > _toIndex) {
         _currentIndex--;
-    }else if (_currentIndex < _toIndex){
-        _currentIndex++;
+         [self updateCurrentIndexWithListCount:listCount];
     }
     
+    while (_currentIndex < _toIndex) {
+        _currentIndex++;
+        [self updateCurrentIndexWithListCount:listCount];
+    }
+}
+
+- (void)updateCurrentIndexWithListCount:(NSInteger)listCount{
     _currentIndex = _currentIndex > 0 ? MIN(_currentIndex, listCount - 1) : 0;
     [self setValue:@(_currentIndex) forKey:kIndexValueChangedKey];
 }
