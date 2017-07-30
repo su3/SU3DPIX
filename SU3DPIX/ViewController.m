@@ -23,6 +23,8 @@ static NSString *kIndexValueChangedKey = @"indexValueChanged";
 @property (nonatomic, assign) NSUInteger indexValueChanged;
 @property (nonatomic, strong) CMMotionManager *motionManager;
 @property (nonatomic, assign) double startDegree;
+
+@property (nonatomic, assign) NSInteger listCount;
 @end
 
 @implementation ViewController{
@@ -85,15 +87,14 @@ static NSString *kIndexValueChangedKey = @"indexValueChanged";
         CGPoint stopLocation = [sender locationInView:self.view];
         CGFloat dx = stopLocation.x - _startLocation.x;
         
-        NSInteger listCount = _imageNameList.count;
         //current index of list count in percent
-        CGFloat indexPer = _currentIndex * 1.0 / listCount;
+        CGFloat indexPer = _currentIndex * 1.0 / _listCount;
         //gesture location of screen in percent
         CGFloat panChange = dx / (CGRectGetWidth(self.view.bounds) / 2.f) ;
 //        NSLog(@"%f",panChange);
         CGFloat indexChanged = indexPer - (panChange * kRotationMultiplier);
-        _toIndex =  listCount * indexChanged;
-        _toIndex = _toIndex > 0 ? MIN(_toIndex, listCount - 1) : 0;
+        _toIndex =  _listCount * indexChanged;
+        _toIndex = _toIndex > 0 ? MIN(_toIndex, _listCount - 1) : 0;
         [self setValue:@(_toIndex) forKey:kIndexValueChangedKey];
     }
     else if(sender.state == UIGestureRecognizerStateEnded){
@@ -118,34 +119,33 @@ static NSString *kIndexValueChangedKey = @"indexValueChanged";
 }
 
 - (void)processMotion:(CMDeviceMotion *)motion fromIndex:(NSInteger)startIndex{
-    NSInteger listCount = _imageNameList.count;
 
-    double temp = motion.attitude.roll + motion.attitude.pitch - motion.attitude.yaw;
+    double temp = motion.attitude.roll - (motion.attitude.yaw * 0.1);
     double roll = [SUPCalculator degrees:temp];
 
     if (_startDegree == 0.) {
         _startDegree = [SUPCalculator degrees:temp];
     }
     double diff =  roll - _startDegree;
-    double diffChange = diff / 70;
+    double diffChange = diff / 75;
     
-    NSInteger diffIndex = listCount * diffChange;
+    NSInteger diffIndex = _listCount * diffChange;
     _toIndex = startIndex - diffIndex;
-    _toIndex = _toIndex > 0 ? MIN(_toIndex, listCount - 1) : 0;
+    _toIndex = _toIndex > 0 ? MIN(_toIndex, _listCount - 1) : 0;
     
     while (_currentIndex > _toIndex) {
         _currentIndex--;
-         [self updateCurrentIndexWithListCount:listCount];
+         [self updateCurrentIndex];
     }
     
     while (_currentIndex < _toIndex) {
         _currentIndex++;
-        [self updateCurrentIndexWithListCount:listCount];
+        [self updateCurrentIndex];
     }
 }
 
-- (void)updateCurrentIndexWithListCount:(NSInteger)listCount{
-    _currentIndex = _currentIndex > 0 ? MIN(_currentIndex, listCount - 1) : 0;
+- (void)updateCurrentIndex{
+    _currentIndex = _currentIndex > 0 ? MIN(_currentIndex, _listCount - 1) : 0;
     [self setValue:@(_currentIndex) forKey:kIndexValueChangedKey];
 }
 
@@ -158,9 +158,10 @@ static NSString *kIndexValueChangedKey = @"indexValueChanged";
 #pragma mark - Data
 
 - (void)getReady{
+    _listCount = self.imageNameList.count;
      [self addObserver:self forKeyPath:kIndexValueChangedKey options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
     
-    _currentIndex = self.imageNameList.count * 0.5;
+    _currentIndex = _listCount * 0.5;
     [self setValue:@(_currentIndex) forKey:kIndexValueChangedKey];
     
     UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleGesture:)];
